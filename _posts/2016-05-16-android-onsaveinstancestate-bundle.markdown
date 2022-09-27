@@ -41,11 +41,11 @@ This is a method on `android.app.Activity` (`android.app.Fragment` has something
 
 The Activity may also be destroyed (temporarily) in order to free up memory. This could happen if the Activity is not visible and a low memory condition occurs.
 
-So from the user's point of view, “temporary destruction” isn't destruction at all. The client code overrides `onSaveInstanceState(Bundle outState)` and saves any UI state that needs to be restored to the new Activity instance to the `outState` bundle. When the Activity is re-instantiated, a copy of the `outState` bundle is passed back in through the onCreate() method:
+So from the user's point of view, “temporary destruction” isn't destruction at all. The client code overrides `onSaveInstanceState(Bundle outState)` and saves any UI state that needs to be restored to the new Activity instance to the `outState` bundle. When the Activity is re-instantiated, a copy of the `outState` bundle is passed back in through the `onCreate()` method:
 
 `protected void onCreate(Bundle savedInstanceState)`
 
-So where is this bundle being saved to? Bundles are an [IPC](https://en.wikipedia.org/wiki/Inter-process_communication) mechanism, so it's not going to the filesystem. But now there's a P involved – which process is it? And what is that process doing with this data? And do I need to be worried about it?
+So where is this bundle being saved to? Bundles are an [IPC](https://en.wikipedia.org/wiki/Inter-process_communication) mechanism, so it's not going to the filesystem. But now there's a *P* involved – which process is it? And what is that process doing with this data? And do I need to be worried about it?
 
 It turns out that these instance state bundles are stored in the *Activity Manager* service. This service is implemented under the package `com.android.server.am` in the Android source code. Recall that Activities are stacked one on top of another and that Android calls these stacks “Tasks” (don't confuse “Task” with “Process” – in computer science they may mean the same thing but in Android they are very different concepts). Each of these tasks is represented internally with an object of class `TaskRecord`. This class contains an array of `ActivityRecord` objects, each of which manages the state of an Activity. `ActivityRecord` contains a member of type Bundle named *icicle*. This *icicle*-bundle is the saved instance state and it is actually stored in the memory space of the *Activity Manager* service.
 
@@ -80,7 +80,7 @@ First let's differentiate between passwords and non-password sensitive informati
 
 If we wish to store a password we can store it outside of the Activity but still inside the memory space of our app (likely in a `char[]` member of our data model or our Application-derived class). This solution will work for rotations and will likely work if our Activity is destroyed due to low memory. The value will be lost however if the entire application process is terminated.
 
-If we wish to store non-password sensitive information, then we can encrypt that information before passing it into the outState bundle. If our app deals with sensitive information, it means that we have some kind of authentication procedure, likely involving a password. This password can be used to derive a symmetric encryption key using PBKDF2. This key can be used to create a `javax.crypto.Cipher` object (likely using AES/CBC/PKCS5Padding encryption), which in turn can be used to encrypt any sensitive information managed by the Activity. The encrypted data can be stored safely in the outState bundle.
+If we wish to store non-password sensitive information, then we can encrypt that information before passing it into the `outState` bundle. If our app deals with sensitive information, it means that we have some kind of authentication procedure, likely involving a password. This password can be used to derive a symmetric encryption key using PBKDF2. This key can be used to create a `javax.crypto.Cipher` object (likely using AES/CBC/PKCS5Padding encryption), which in turn can be used to encrypt any sensitive information managed by the Activity. The encrypted data can be stored safely in the `outState` bundle.
 
 ## Is Activity.onSaveInstanceState() safe?
 I'm not insinuating that it isn't. It's probably perfectly safe. I can't think of any ways of attacking it.
