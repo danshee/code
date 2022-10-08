@@ -5,9 +5,13 @@ date:   2016-05-16 -0700
 categories:
 ---
 
+![](/code/images/OpenHole.jpeg)
+
+<br>
+
 > Is it secret? Is it safe?
 
-&nbsp;- Gandalf
+&emsp;&emsp;- Gandalf
 
 I recall a lesson from a second-year computer science course.
 
